@@ -1,0 +1,56 @@
+{
+  "name": "@srwild/dng-to-md",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Generate Markdown files from normalized DNG image metadata.",
+  "type": "module",
+  "bin": {
+    "dng-to-md": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "vitest run --config vitest.integration.config.ts --passWithNoTests",
+    "prepack": "npm run build"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "cli",
+    "dng",
+    "exiftool",
+    "markdown",
+    "metadata"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "exiftool-vendored": "^37.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.3",
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^4.1.6",
+    "eslint": "^9.39.3",
+    "globals": "^16.0.0",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^4.1.6"
+  }
+}

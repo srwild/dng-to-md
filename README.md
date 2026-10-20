@@ -2,7 +2,35 @@
 
 `dng-to-md` is an early-stage Node.js CLI package for generating Markdown from normalized DNG image metadata. It is intended for content-authoring workflows, including projects built with Astro or Eleventy, without depending on either framework.
 
-The current release establishes the package architecture and development tooling. Metadata extraction, configuration loading, YAML frontmatter, and Markdown generation are not implemented yet.
+The package API extracts normalized metadata from DNG files. CLI processing, configuration loading, YAML frontmatter, and Markdown generation are not implemented yet.
+
+## Package API
+
+```ts
+import { ExifToolAdapter, readImageMetadata } from '@srwild/dng-to-md';
+
+const reader = new ExifToolAdapter();
+try {
+  const metadata = await readImageMetadata('photo.dng', reader);
+  console.log(metadata);
+} finally {
+  await reader.close();
+}
+```
+
+The result always includes `format: 'dng'`. All other fields are optional:
+
+| Fields | Values |
+| --- | --- |
+| `cameraMake`, `cameraModel`, `lens` | Trimmed strings |
+| `width`, `height` | Positive integer pixel dimensions from ImageWidth/ImageHeight |
+| `exposureTime`, `aperture`, `iso`, `focalLength` | Seconds, f-number, integer ISO, millimeters |
+| `title`, `caption`, `copyright` | Trimmed authoring text, preserving internal line breaks |
+| `keywords` | Ordered, trimmed strings with exact duplicates removed |
+
+Authoring fields prefer XMP, falling back to IPTC, then applicable EXIF fields when values are missing or unusable. Keywords use XMP Subject before IPTC Keywords without merging sources or splitting punctuation. Missing or invalid values are omitted. Text is not escaped for Markdown or YAML.
+
+Only embedded metadata is read; sidecar discovery is not supported. Extraction failures reject the read promise. The caller owns the reader lifecycle and must await `close()`, including after a failed read.
 
 ## Requirements
 
@@ -34,7 +62,7 @@ node dist/cli.js --help
 - `tests/integration` is reserved for a small set of real DNG tests.
 - `tests/fixtures/exiftool` stores reviewed JSON for metadata mapping tests.
 
-Normalized metadata will use an explicit allowlist. Raw ExifTool output will not be passed to Markdown generation, preventing accidental publication of fields such as GPS coordinates, camera serial numbers, or owner information.
+Normalized metadata uses an explicit allowlist. Raw ExifTool output is not returned to application code, excluding fields such as GPS coordinates, camera serial numbers, owner information, and source paths. Authoring text is included as supplied and may itself contain identifying information.
 
 ## License
 
